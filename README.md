@@ -4,19 +4,19 @@
 
 ## 界面截图
 
-![桌面端启动](src/agentcore-desktop/screenshots/desktop-start.png)
+![桌面端启动](screenshots/desktop-start.png)
 
 *桌面端启动 / Desktop start screen*
 
-![桌面对话回复](src/agentcore-desktop/screenshots/desktop-chat-reply.png)
+![桌面对话回复](screenshots/desktop-chat-reply.png)
 
 *桌面对话回复 / Desktop chat reply*
 
-![Agent 后端设置](src/agentcore-desktop/screenshots/settings-agent-backend.png)
+![Agent 后端设置](screenshots/settings-agent-backend.png)
 
 *Agent 后端设置 / Agent backend settings*
 
-![Web 端对话](src/agentcore-desktop/screenshots/web-chat-reply.png)
+![Web 端对话](screenshots/web-chat-reply.png)
 
 *Web 端对话 / Web chat reply*
 
@@ -35,25 +35,23 @@
 
 ## 从源码运行
 
-源码在 `src/agentcore-desktop/`。本仓库不包含安装包。开发与构建请以该目录下的说明为准：
+源码在仓库根目录。本仓库不包含安装包。开发与构建请以仓库中的说明为准：
 
 ```bash
-cd src/agentcore-desktop
 # 详见其中 README：ZCode 前端通常使用 pnpm，Agent 服务使用 Python
 ```
-
-ZCode 本体在 `src/agentcore-desktop/ZCode/`，产品说明见 `src/agentcore-desktop/README.md`。
+ZCode 本体在 `ZCode/`，产品说明见 `README.original.md`。
 
 ## 文档
 
-- [产品说明](src/agentcore-desktop/README.md)
-- [ZCode README](src/agentcore-desktop/ZCode/README.md)
-- [ZCode README (English)](src/agentcore-desktop/ZCode/README.en.md)
-- [AgentScope](src/agentcore-desktop/agentscope/README_zh.md)
+- [产品说明](README.original.md)
+- [ZCode README](ZCode/README.md)
+- [ZCode README (English)](ZCode/README.en.md)
+- [AgentScope](agentscope/README_zh.md)
 
 ## 许可证
 
-ZCode 在 `src/agentcore-desktop/ZCode/package.json` 与 `src/agentcore-desktop/ZCode/LICENSE` 中声明为 Apache-2.0。请同时查看 ZCode 的第三方声明。
+ZCode 在 `ZCode/package.json` 与 `ZCode/LICENSE` 中声明为 Apache-2.0。请同时查看 ZCode 的第三方声明。
 
 ---
 
@@ -65,19 +63,19 @@ ZCode 在 `src/agentcore-desktop/ZCode/package.json` 与 `src/agentcore-desktop/
 
 ## Screenshots
 
-![Desktop start screen](src/agentcore-desktop/screenshots/desktop-start.png)
+![Desktop start screen](screenshots/desktop-start.png)
 
 *桌面端启动 / Desktop start screen*
 
-![Desktop chat reply](src/agentcore-desktop/screenshots/desktop-chat-reply.png)
+![Desktop chat reply](screenshots/desktop-chat-reply.png)
 
 *桌面对话回复 / Desktop chat reply*
 
-![Agent backend settings](src/agentcore-desktop/screenshots/settings-agent-backend.png)
+![Agent backend settings](screenshots/settings-agent-backend.png)
 
 *Agent 后端设置 / Agent backend settings*
 
-![Web chat reply](src/agentcore-desktop/screenshots/web-chat-reply.png)
+![Web chat reply](screenshots/web-chat-reply.png)
 
 *Web 端对话 / Web chat reply*
 
@@ -96,23 +94,21 @@ ZCode 在 `src/agentcore-desktop/ZCode/package.json` 与 `src/agentcore-desktop/
 
 ## Getting started
 
-Source is under `src/agentcore-desktop/`. This repository does not include installers. Follow the in-tree README for development and builds:
+Source is at the repository root. This repository does not include installers. Follow the in-tree README for development and builds:
 
 ```bash
-cd src/agentcore-desktop
 # See that README: the ZCode UI typically uses pnpm; the agent service uses Python
 ```
-
-ZCode itself lives in `src/agentcore-desktop/ZCode/`. Product notes are in `src/agentcore-desktop/README.md`.
+ZCode itself lives in `ZCode/`. Product notes are in `README.original.md`.
 
 ## Documentation
 
-- [产品说明](src/agentcore-desktop/README.md)
-- [ZCode README](src/agentcore-desktop/ZCode/README.md)
-- [ZCode README (English)](src/agentcore-desktop/ZCode/README.en.md)
-- [AgentScope](src/agentcore-desktop/agentscope/README_zh.md)
+- [产品说明](README.original.md)
+- [ZCode README](ZCode/README.md)
+- [ZCode README (English)](ZCode/README.en.md)
+- [AgentScope](agentscope/README_zh.md)
 
 ## License
 
-ZCode is licensed Apache-2.0 (`src/agentcore-desktop/ZCode/LICENSE` and `package.json`). Also see ZCode third-party notices.
+ZCode is licensed Apache-2.0 (`ZCode/LICENSE` and `package.json`). Also see ZCode third-party notices.
 
