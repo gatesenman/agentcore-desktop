@@ -1,0 +1,11 @@
+ZCode/
+agentscope/
+agent-service/.env
+agent-service/.venv/
+agent-service/build/
+agent-service/dist/
+agent-service/gateway.json
+*.spec
+__pycache__/
+*.log
+!agent-service/agent-gateway.spec

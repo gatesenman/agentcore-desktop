@@ -1,0 +1,7 @@
+{
+  "backend": "mock",
+  "backends": {
+    "agentscope": { "dashscope_model": "qwen-plus", "sys_prompt": "You are a helpful assistant." },
+    "openai": { "base_url": "http://127.0.0.1:8000/v1", "api_key": "", "upstream_model": "" }
+  }
+}
