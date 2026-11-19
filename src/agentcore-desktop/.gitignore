@@ -1,5 +1,3 @@
-ZCode/
-agentscope/
 agent-service/.env
 agent-service/.venv/
 agent-service/build/
