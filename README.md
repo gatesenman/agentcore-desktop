@@ -1,21 +1,118 @@
-﻿# AgentCore桌面端
+# AgentCore 桌面端
 
-**简介**：AgentCore Desktop：基于阿里云 Agent Core + ZCode 前端的跨端桌面应用
+**3.15.1** · 基于 ZCode 前端、可插拔 Agent 后端的跨平台桌面应用，可接入 AgentScope、阿里云 AgentCore、AG-UI 以及 OpenAI 兼容服务。
 
-**最新版本**：3.15.1
+## 界面截图
 
-## 文件清单
+![桌面端启动](src/agentcore-desktop/screenshots/desktop-start.png)
 
-| 目录 | 文件 | 大小 | SHA256 |
-|---|---|---|---|
-| 安装包 | AgentCore-Desktop-Setup.exe | 224.3 MB | `6006AC2BC677B59485ED55F1F2D5079050F9EA2AA164A056437E6736845B5907` |
-| 安装包 | AgentCore-Desktop-3.15.1-linux-amd64.deb | 241.1 MB | `E19E85309A6FE0A1C64EE466C9C764BA3352EE4CC23DF1B2D064408DF8926BCB` |
-| 源代码 | AgentCore-Desktop-source.zip | 115.0 MB | `11CE15841C36F62AAC989D72C490BC3F39E7D5DB375231E6EE36E2314F3F5B0B` |
-| 源代码 | agentcore-sep-sources.tgz | 0.5 MB | `0CE5B2DCF45E5EB9EF5992752699CFCCEC178CF78FF1E9F2FB1D7FDA98A4E967` |
-| 文档 | README.txt | 0.0 MB | `69353E320F8A1A4CE355F0CFB8D0B6E4DD693A93E8B73727B57E55FAFCF23719` |
+*桌面端启动 / Desktop start screen*
 
-## 安装 / 运行
+![桌面对话回复](src/agentcore-desktop/screenshots/desktop-chat-reply.png)
 
-Windows 运行 AgentCore-Desktop-Setup.exe；Linux/WSL 用 sudo dpkg -i *.deb；配置与密钥见源码包内 README
+*桌面对话回复 / Desktop chat reply*
 
-_整理时间：2026-10-14 16:05；原始文件仍保留在原位置，见上级目录 待删除清单.txt_
+![Agent 后端设置](src/agentcore-desktop/screenshots/settings-agent-backend.png)
+
+*Agent 后端设置 / Agent backend settings*
+
+![Web 端对话](src/agentcore-desktop/screenshots/web-chat-reply.png)
+
+*Web 端对话 / Web chat reply*
+
+## 功能特性
+
+- ZCode（Electron + React）桌面 / Web 共用界面，通过桥接接入多种 Agent 后端。
+- 后端插件：mock、AgentScope、阿里云 AgentCore、AG-UI、OpenAI 兼容网关，可按需扩展。
+- 内置工具执行（读文件、终端、编辑等）与流式对话、审计/历史记录。
+- 配套 `agent-service` Python 网关（可打包为独立可执行文件）。
+
+## 技术栈
+
+- 前端：ZCode（Electron, React, TypeScript）
+- 网关：Python / FastAPI（AgentScope 等）
+- 包管理：pnpm（ZCode 工作区）
+
+## 从源码运行
+
+源码在 `src/agentcore-desktop/`。本仓库不包含安装包。开发与构建请以该目录下的说明为准：
+
+```bash
+cd src/agentcore-desktop
+# 详见其中 README：ZCode 前端通常使用 pnpm，Agent 服务使用 Python
+```
+
+ZCode 本体在 `src/agentcore-desktop/ZCode/`，产品说明见 `src/agentcore-desktop/README.md`。
+
+## 文档
+
+- [产品说明](src/agentcore-desktop/README.md)
+- [ZCode README](src/agentcore-desktop/ZCode/README.md)
+- [ZCode README (English)](src/agentcore-desktop/ZCode/README.en.md)
+- [AgentScope](src/agentcore-desktop/agentscope/README_zh.md)
+
+## 许可证
+
+ZCode 在 `src/agentcore-desktop/ZCode/package.json` 与 `src/agentcore-desktop/ZCode/LICENSE` 中声明为 Apache-2.0。请同时查看 ZCode 的第三方声明。
+
+---
+
+## English
+
+# AgentCore Desktop
+
+**3.15.1** · A cross-platform desktop app built on the ZCode frontend with pluggable agent backends: AgentScope, Alibaba Cloud AgentCore, AG-UI, and OpenAI-compatible services.
+
+## Screenshots
+
+![Desktop start screen](src/agentcore-desktop/screenshots/desktop-start.png)
+
+*桌面端启动 / Desktop start screen*
+
+![Desktop chat reply](src/agentcore-desktop/screenshots/desktop-chat-reply.png)
+
+*桌面对话回复 / Desktop chat reply*
+
+![Agent backend settings](src/agentcore-desktop/screenshots/settings-agent-backend.png)
+
+*Agent 后端设置 / Agent backend settings*
+
+![Web chat reply](src/agentcore-desktop/screenshots/web-chat-reply.png)
+
+*Web 端对话 / Web chat reply*
+
+## Features
+
+- Shared ZCode (Electron + React) UI for desktop and web, bridged to multiple agent backends.
+- Backend plugins: mock, AgentScope, Alibaba Cloud AgentCore, AG-UI, and OpenAI-compatible gateways.
+- Built-in tool execution (files, shell, edits), streaming chat, and audit/history views.
+- Includes an `agent-service` Python gateway that can be packaged as a standalone executable.
+
+## Tech stack
+
+- 前端：ZCode（Electron, React, TypeScript）
+- 网关：Python / FastAPI（AgentScope 等）
+- 包管理：pnpm（ZCode 工作区）
+
+## Getting started
+
+Source is under `src/agentcore-desktop/`. This repository does not include installers. Follow the in-tree README for development and builds:
+
+```bash
+cd src/agentcore-desktop
+# See that README: the ZCode UI typically uses pnpm; the agent service uses Python
+```
+
+ZCode itself lives in `src/agentcore-desktop/ZCode/`. Product notes are in `src/agentcore-desktop/README.md`.
+
+## Documentation
+
+- [产品说明](src/agentcore-desktop/README.md)
+- [ZCode README](src/agentcore-desktop/ZCode/README.md)
+- [ZCode README (English)](src/agentcore-desktop/ZCode/README.en.md)
+- [AgentScope](src/agentcore-desktop/agentscope/README_zh.md)
+
+## License
+
+ZCode is licensed Apache-2.0 (`src/agentcore-desktop/ZCode/LICENSE` and `package.json`). Also see ZCode third-party notices.
+
