@@ -7,3 +7,15 @@ agent-service/gateway.json
 __pycache__/
 *.log
 !agent-service/agent-gateway.spec
+
+# Additional hygiene
+.DS_Store
+Thumbs.db
+.env.local
+.env.*.local
+node_modules/
+target/
+logs/
+coverage/
+!.env.example
+!.env.example.*

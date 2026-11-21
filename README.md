@@ -40,14 +40,18 @@
 ```bash
 # 详见其中 README：ZCode 前端通常使用 pnpm，Agent 服务使用 Python
 ```
-ZCode 本体在 `ZCode/`，产品说明见 `README.original.md`。
+ZCode 本体在 `ZCode/`。
 
 ## 文档
 
-- [产品说明](README.original.md)
 - [ZCode README](ZCode/README.md)
 - [ZCode README (English)](ZCode/README.en.md)
 - [AgentScope](agentscope/README_zh.md)
+
+
+## 贡献
+
+欢迎通过 Issue 和 Pull Request 参与，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。参与时请遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
 
 ## 许可证
 
@@ -99,16 +103,19 @@ Source is at the repository root. This repository does not include installers. F
 ```bash
 # See that README: the ZCode UI typically uses pnpm; the agent service uses Python
 ```
-ZCode itself lives in `ZCode/`. Product notes are in `README.original.md`.
+ZCode itself lives in `ZCode/`.
 
 ## Documentation
 
-- [产品说明](README.original.md)
 - [ZCode README](ZCode/README.md)
 - [ZCode README (English)](ZCode/README.en.md)
 - [AgentScope](agentscope/README_zh.md)
 
+
+## Contributing
+
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Please report vulnerabilities privately via [SECURITY.md](SECURITY.md). This project follows [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
 ## License
 
 ZCode is licensed Apache-2.0 (`ZCode/LICENSE` and `package.json`). Also see ZCode third-party notices.
-
