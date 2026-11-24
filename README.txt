@@ -1,14 +1,18 @@
-AgentCore Desktop 交付说明
+AgentCore Desktop 仓库说明
 ========================
 
-1) AgentCore-Desktop-source.zip
-   - 源代码（含 bridge / agent-service / patches / README / 已打补丁的 ZCode + agentscope）
-   - 已排除 node_modules、dist、.venv、.git、.env、mock-cdn 等
+本 GitHub 仓库提供源代码（含 bridge / agent-service / patches / 已适配的 ZCode 与 agentscope）。
+仓库内不包含安装包，也不应把 .env、gateway.json 或 API Key 提交进来。
 
-2) AgentCore-Desktop-3.15.1-linux-amd64.deb
-   - Linux amd64 安装包（.deb）
-   - 注意：这是 Linux 安装包，不能直接在 Windows 上安装。
-   - 可在 WSL / Ubuntu 等 Linux 环境中安装使用。
-   - Windows 安装包需另行在 Windows 上构建或通过 CI 打包。
+测试（无需云端密钥，与 CI 相同）：
 
-配置与密钥请参考源码包内 README，勿把 API Key 提交进仓库。
+  ./scripts/run-tests.sh
+
+开发与构建的准确步骤、以及“什么已测 / 什么未测”见：
+
+  docs/开发与构建.md
+  docs/迭代记录.md
+  agent-service/README.md
+
+Windows / macOS / Linux 安装包需要在对应系统上按 ZCode 桌面打包流程另行构建，
+并在目标机器上手工验证。请勿假设本仓库已附带可安装的 Setup.exe。

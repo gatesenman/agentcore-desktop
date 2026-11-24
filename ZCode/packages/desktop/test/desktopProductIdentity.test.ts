@@ -4,12 +4,17 @@ import { resolve } from "node:path";
 
 import {
   desktopProductIdentities,
+  isAgentCoreDesktopIdentityEnabled,
   resolveDesktopArtifactSuffix,
   resolveDesktopProductFlavor,
+  resolveDesktopProtocolScheme,
+  resolveProductHomeDataDirName,
   resolveWindowsAppUserModelId,
   resolveWindowsAppUserModelIdForFlavor,
   resolveDesktopProductIdentity,
 } from "../scripts/desktop-product-identity.mjs";
+
+const zcodeIdentityEnv = { AGENTCORE_DESKTOP_IDENTITY: "0" };
 
 describe("desktop product identity", () => {
   it("根锁文件的发布版本与构建版本一致", () => {
@@ -23,7 +28,7 @@ describe("desktop product identity", () => {
   });
 
   it("ZCODE_ENV=test 使用可与生产版并排安装的 Preview 身份", () => {
-    expect(resolveDesktopProductIdentity({ ZCODE_ENV: "test" })).toEqual({
+    expect(resolveDesktopProductIdentity({ ...zcodeIdentityEnv, ZCODE_ENV: "test" })).toEqual({
       flavor: "preview",
       appId: "dev.zcode.app.preview",
       productName: "ZCode Preview",
@@ -36,12 +41,12 @@ describe("desktop product identity", () => {
   it("ZCODE_PREVIEW_IDENTITY=1 让生产后端的构建改用 Preview 身份", () => {
     // 身份与后端环境分轴：同一份 Preview 身份既可以连测试后端，也可以连生产后端。
     for (const flag of ["1", " 1 "]) {
-      const env = { ZCODE_ENV: "production", ZCODE_PREVIEW_IDENTITY: flag };
+      const env = { ...zcodeIdentityEnv, ZCODE_ENV: "production", ZCODE_PREVIEW_IDENTITY: flag };
       expect(resolveDesktopProductFlavor(env)).toBe("preview");
       expect(resolveDesktopProductIdentity(env)).toBe(desktopProductIdentities.preview);
     }
     for (const flag of ["", "0"]) {
-      const env = { ZCODE_ENV: "production", ZCODE_PREVIEW_IDENTITY: flag };
+      const env = { ...zcodeIdentityEnv, ZCODE_ENV: "production", ZCODE_PREVIEW_IDENTITY: flag };
       expect(resolveDesktopProductFlavor(env)).toBe("production");
     }
   });
@@ -51,7 +56,7 @@ describe("desktop product identity", () => {
     // `ZCODE_PREVIEW_IDENTITY=true` 会落入 @electron/dev 生产验收目录却打出 Preview 身份包。
     for (const flag of ["true", "yes", "on", "false", "no", "off", "2"]) {
       expect(() =>
-        resolveDesktopProductFlavor({ ZCODE_ENV: "production", ZCODE_PREVIEW_IDENTITY: flag }),
+        resolveDesktopProductFlavor({ ...zcodeIdentityEnv, ZCODE_ENV: "production", ZCODE_PREVIEW_IDENTITY: flag }),
       ).toThrow(/expected 1 or 0/);
     }
   });
@@ -75,7 +80,7 @@ describe("desktop product identity", () => {
   });
 
   it("ZCODE_ENV=production 完整保留正式包身份", () => {
-    expect(resolveDesktopProductIdentity({ ZCODE_ENV: "production" })).toBe(
+    expect(resolveDesktopProductIdentity({ ...zcodeIdentityEnv, ZCODE_ENV: "production" })).toBe(
       desktopProductIdentities.production,
     );
     expect(desktopProductIdentities.production).toEqual({
@@ -89,30 +94,52 @@ describe("desktop product identity", () => {
   });
 
   it("未注入或未知环境时不应误生成正式安装身份", () => {
-    expect(resolveDesktopProductIdentity({}).flavor).toBe("preview");
-    expect(resolveDesktopProductIdentity({ ZCODE_ENV: "staging" }).flavor).toBe("preview");
+    expect(resolveDesktopProductIdentity({ ...zcodeIdentityEnv }).flavor).toBe("preview");
+    expect(resolveDesktopProductIdentity({ ...zcodeIdentityEnv, ZCODE_ENV: "staging" }).flavor).toBe("preview");
   });
 
   it("打包态 Windows AUMID 必须和 NSIS appId 保持一致", () => {
-    expect(resolveWindowsAppUserModelId({ ZCODE_ENV: "production" })).toBe(
+    expect(resolveWindowsAppUserModelId({ ...zcodeIdentityEnv, ZCODE_ENV: "production" })).toBe(
       desktopProductIdentities.production.appId,
     );
-    expect(resolveWindowsAppUserModelId({ ZCODE_ENV: "test" })).toBe(
+    expect(resolveWindowsAppUserModelId({ ...zcodeIdentityEnv, ZCODE_ENV: "test" })).toBe(
       desktopProductIdentities.preview.appId,
     );
     expect(
-      resolveWindowsAppUserModelId({ ZCODE_ENV: "production", ZCODE_PREVIEW_IDENTITY: "1" }),
+      resolveWindowsAppUserModelId({ ...zcodeIdentityEnv, ZCODE_ENV: "production", ZCODE_PREVIEW_IDENTITY: "1" }),
     ).toBe(desktopProductIdentities.preview.appId);
     // 主进程按编译期 flavor 取 AUMID，不依赖安装后机器上的环境变量。
-    expect(resolveWindowsAppUserModelIdForFlavor("preview")).toBe(
+    expect(resolveWindowsAppUserModelIdForFlavor("preview", { isPackaged: true }, zcodeIdentityEnv)).toBe(
       desktopProductIdentities.preview.appId,
     );
-    expect(resolveWindowsAppUserModelIdForFlavor("production")).toBe(
+    expect(resolveWindowsAppUserModelIdForFlavor("production", { isPackaged: true }, zcodeIdentityEnv)).toBe(
       desktopProductIdentities.production.appId,
     );
   });
 
   it("开发态继续使用独立 AUMID，避免污染打包版 Shell 身份", () => {
-    expect(resolveWindowsAppUserModelId({}, { isPackaged: false })).toBe("cn.aminer.zcode");
+    expect(resolveWindowsAppUserModelId({ ...zcodeIdentityEnv }, { isPackaged: false })).toBe("cn.aminer.zcode");
+  });
+
+  it("默认启用 AgentCore 身份：appId、协议和家目录与 ZCode 完全分开", () => {
+    expect(isAgentCoreDesktopIdentityEnabled({})).toBe(true);
+    expect(resolveDesktopProductIdentity({ ZCODE_ENV: "production" })).toEqual({
+      flavor: "production",
+      appId: "com.agentcore.desktop",
+      productName: "AgentCore Desktop",
+      linuxExecutableName: "agentcore-desktop",
+      linuxPackageName: "agentcore-desktop",
+      cuaHelperInstallVariant: null,
+    });
+    expect(resolveDesktopProtocolScheme({})).toBe("agentcore");
+    expect(resolveProductHomeDataDirName({})).toBe(".agentcore-desktop");
+    expect(resolveWindowsAppUserModelId({ ZCODE_ENV: "production" })).toBe("com.agentcore.desktop");
+    expect(resolveWindowsAppUserModelId({}, { isPackaged: false })).toBe("com.agentcore.desktop.dev");
+  });
+
+  it("AGENTCORE_DESKTOP_IDENTITY=0 时回退 ZCode 协议与数据目录", () => {
+    expect(isAgentCoreDesktopIdentityEnabled(zcodeIdentityEnv)).toBe(false);
+    expect(resolveDesktopProtocolScheme(zcodeIdentityEnv)).toBe("zcode");
+    expect(resolveProductHomeDataDirName(zcodeIdentityEnv)).toBe(".zcode");
   });
 });

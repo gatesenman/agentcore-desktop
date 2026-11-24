@@ -42,9 +42,21 @@ export function getDataBaseDir(): string {
   return defaultDataBaseDir;
 }
 
-/** {dataBaseDir}/.zcode */
+/** 家目录下的产品数据目录名。默认 `.agentcore-desktop`，与 ZCode 的 `~/.zcode` 隔离。 */
+export const ZCODE_HOME_DATA_DIR_NAME = ".zcode";
+export const AGENTCORE_HOME_DATA_DIR_NAME = ".agentcore-desktop";
+
+export function getProductHomeDataDirName(
+  env: Record<string, string | undefined> = process.env,
+): string {
+  return (env.AGENTCORE_DESKTOP_IDENTITY ?? "1") !== "0"
+    ? AGENTCORE_HOME_DATA_DIR_NAME
+    : ZCODE_HOME_DATA_DIR_NAME;
+}
+
+/** {dataBaseDir}/.agentcore-desktop（或回退时的 .zcode） */
 export function getZCodeDataRootDir(): string {
-  return join(getDataBaseDir(), ".zcode");
+  return join(getDataBaseDir(), getProductHomeDataDirName());
 }
 
 /** 非项目对话共享的真实工作目录；默认 ~/.zcode/workspace/default。 */

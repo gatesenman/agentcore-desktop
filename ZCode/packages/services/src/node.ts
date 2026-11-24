@@ -81,6 +81,9 @@ export type {
 export {
   setDataBaseDir,
   getDataBaseDir,
+  getProductHomeDataDirName,
+  AGENTCORE_HOME_DATA_DIR_NAME,
+  ZCODE_HOME_DATA_DIR_NAME,
   getZCodeDataRootDir,
   getConversationWorkspaceDir,
   getAppConfigDir,

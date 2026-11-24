@@ -5,7 +5,7 @@ import { resolveStorageRoots } from "../src/storage/adapters/rootsResolver.js";
 describe("resolveStorageRoots", () => {
   it("returns only the home root when the data base dir is the home dir", () => {
     expect(resolveStorageRoots({ homeDir: "/Users/u", dataBaseDir: "/Users/u/" })).toEqual([
-      { id: "home", path: join(resolve("/Users/u"), ".zcode"), hasCustomDataBaseDir: false },
+      { id: "home", path: join(resolve("/Users/u"), ".agentcore-desktop"), hasCustomDataBaseDir: false },
     ]);
   });
 
@@ -13,12 +13,22 @@ describe("resolveStorageRoots", () => {
     expect(
       resolveStorageRoots({ homeDir: "/Users/u", dataBaseDir: "/Volumes/Data/zcode" }),
     ).toEqual([
-      { id: "home", path: join(resolve("/Users/u"), ".zcode"), hasCustomDataBaseDir: true },
+      { id: "home", path: join(resolve("/Users/u"), ".agentcore-desktop"), hasCustomDataBaseDir: true },
       {
         id: "dataBaseDir",
-        path: join(resolve("/Volumes/Data/zcode"), ".zcode"),
+        path: join(resolve("/Volumes/Data/zcode"), ".agentcore-desktop"),
         hasCustomDataBaseDir: true,
       },
     ]);
+  });
+
+  it("can keep the historic .zcode directory when the caller opts out", () => {
+    expect(
+      resolveStorageRoots({
+        homeDir: "/Users/u",
+        dataBaseDir: "/Users/u/",
+        dataDirName: ".zcode",
+      }),
+    ).toEqual([{ id: "home", path: join(resolve("/Users/u"), ".zcode"), hasCustomDataBaseDir: false }]);
   });
 });

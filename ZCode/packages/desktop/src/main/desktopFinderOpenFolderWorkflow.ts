@@ -3,16 +3,18 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
 import type { Locale } from "@zcode/shared";
+import { resolveDesktopProtocolScheme } from "../../scripts/desktop-product-identity.mjs";
 
 const WORKFLOW_NAME = "Open in AgentCore Desktop.workflow";
-const WORKFLOW_BUNDLE_ID = "dev.zcode.app.finder-open-workflow";
-const WORKFLOW_VERSION = "5";
+const WORKFLOW_BUNDLE_ID = "com.agentcore.desktop.finder-open-workflow";
+const WORKFLOW_VERSION = "6";
 const SERVICES_MENU_LABELS: Record<Locale, string> = {
-  "zh-CN": "在ZCode中打开",
+  "zh-CN": "在 AgentCore 桌面端中打开",
   "en-US": "Open in AgentCore Desktop",
 };
 
-const workflowScript = `first=""
+function buildWorkflowScript(scheme: string = resolveDesktopProtocolScheme()): string {
+  return `first=""
 for item in "$@"; do
   if [ -d "$item" ]; then
     first="$item"
@@ -22,9 +24,12 @@ done
 
 if [ -n "$first" ]; then
   encoded=$(/usr/bin/osascript -l JavaScript -e 'function run(argv) { return encodeURIComponent(argv[0]); }' "$first")
-  /usr/bin/open "zcode://workspace/open?path=\${encoded}"
+  /usr/bin/open "${scheme}://workspace/open?path=\${encoded}"
 fi
 `;
+}
+
+const workflowScript = buildWorkflowScript();
 
 function escapeXml(value: string): string {
   return value
