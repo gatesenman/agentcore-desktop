@@ -35,12 +35,36 @@
 
 ## 从源码运行
 
-源码在仓库根目录。本仓库不包含安装包。开发与构建请以仓库中的说明为准：
+源码在仓库根目录。**本仓库不包含安装包，也尚未在本迭代中发布经过验证的 Windows 安装包。** 开发、测试与构建细节见 [docs/开发与构建.md](docs/开发与构建.md) 和 [agent-service/README.md](agent-service/README.md)。
+
+本地复现 CI（无需任何云端 API Key）：
 
 ```bash
-# 详见其中 README：ZCode 前端通常使用 pnpm，Agent 服务使用 Python
+./scripts/run-tests.sh
 ```
-ZCode 本体在 `ZCode/`。
+
+或：
+
+```bash
+cd agent-service
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest -q
+# 回到仓库根目录后：
+node --test tests/product-isolation.test.mjs tests/gateway-supervisor.test.mjs
+```
+
+启动本机网关（默认 `127.0.0.1:18765`）：
+
+```bash
+cd agent-service
+source .venv/bin/activate
+python run_gateway.py --host 127.0.0.1 --port 18765
+```
+
+密钥放在 `agent-service/.env` 或 `~/.agentcore-desktop/.env`，不要提交。默认应用数据目录是 `~/.agentcore-desktop`，协议是 `agentcore://`，与原版 ZCode 隔离。
+
+ZCode 本体在 `ZCode/`。从源码运行完整桌面还需要 ZCode 工作区的 pnpm 依赖，参见 `ZCode/README.md`。
 
 ## 文档
 
@@ -98,12 +122,25 @@ ZCode 在 `ZCode/package.json` 与 `ZCode/LICENSE` 中声明为 Apache-2.0。请
 
 ## Getting started
 
-Source is at the repository root. This repository does not include installers. Follow the in-tree README for development and builds:
+Source is at the repository root. **This repository does not include installers, and this iteration does not publish a verified Windows setup package.** See [docs/开发与构建.md](docs/开发与构建.md) and [agent-service/README.md](agent-service/README.md).
+
+Reproduce CI locally (no cloud API keys required):
 
 ```bash
-# See that README: the ZCode UI typically uses pnpm; the agent service uses Python
+./scripts/run-tests.sh
 ```
-ZCode itself lives in `ZCode/`.
+
+Start the local gateway on `127.0.0.1:18765`:
+
+```bash
+cd agent-service
+source .venv/bin/activate
+python run_gateway.py --host 127.0.0.1 --port 18765
+```
+
+Put secrets in `agent-service/.env` or `~/.agentcore-desktop/.env` and never commit them. Default data lives in `~/.agentcore-desktop` with the `agentcore://` protocol, isolated from stock ZCode.
+
+The ZCode tree is in `ZCode/`. Running the full desktop UI from source also needs the ZCode pnpm workspace; see `ZCode/README.md`.
 
 ## Documentation
 
