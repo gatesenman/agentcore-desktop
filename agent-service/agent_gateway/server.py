@@ -15,6 +15,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
 from .backends import REGISTRY
 from .backends.base import AgentBackend
+from .errors import public_error
 
 
 def _load_dotenv() -> None:
@@ -154,11 +155,11 @@ def create_app(runtime: GatewayRuntime | None = None, **runtime_kwargs) -> FastA
             try:
                 parts = [d async for d in gw().backend.chat(body)]
             except Exception as e:  # noqa: BLE001
-                gw().last_error = str(e)[:500]
-                status = getattr(e, "status", None) or getattr(e, "status_code", None) or 502
+                status, message = public_error(e)
+                gw().last_error = message
                 return JSONResponse(
-                    {"error": {"message": str(e)[:500], "type": "upstream_error", "code": status}},
-                    status_code=status if 400 <= status < 600 else 502,
+                    {"error": {"message": message, "type": "upstream_error", "code": status}},
+                    status_code=status,
                 )
             for d in parts:
                 usage = d.get("usage") or usage
@@ -192,11 +193,11 @@ def create_app(runtime: GatewayRuntime | None = None, **runtime_kwargs) -> FastA
         except StopAsyncIteration:
             first = None
         except Exception as e:  # noqa: BLE001
-            gw().last_error = str(e)[:500]
-            status = getattr(e, "status", None) or getattr(e, "status_code", None) or 502
+            status, message = public_error(e)
+            gw().last_error = message
             return JSONResponse(
-                {"error": {"message": str(e)[:500], "type": "upstream_error", "code": status}},
-                status_code=status if 400 <= status < 600 else 502,
+                {"error": {"message": message, "type": "upstream_error", "code": status}},
+                status_code=status,
             )
 
         async def items():
@@ -224,8 +225,9 @@ def create_app(runtime: GatewayRuntime | None = None, **runtime_kwargs) -> FastA
                                     fh.write(f"{gw().backend.name}\t{n}\n")
                     yield f"data: {json.dumps(chunk(d), ensure_ascii=False)}\n\n"
             except Exception as e:  # noqa: BLE001  流中途出错：发 OpenAI 风格 error 事件
-                gw().last_error = str(e)[:500]
-                yield f"data: {json.dumps({'error': {'message': str(e)[:500], 'type': 'upstream_error'}}, ensure_ascii=False)}\n\n"
+                status, message = public_error(e)
+                gw().last_error = message
+                yield f"data: {json.dumps({'error': {'message': message, 'type': 'upstream_error', 'code': status}}, ensure_ascii=False)}\n\n"
                 yield "data: [DONE]\n\n"
                 return
             final = chunk({}, "tool_calls" if saw_tools else "stop")
@@ -271,8 +273,9 @@ def create_app(runtime: GatewayRuntime | None = None, **runtime_kwargs) -> FastA
                 yield ev(type="TEXT_MESSAGE_END", messageId=mid)
                 yield ev(type="RUN_FINISHED", threadId=tid, runId=rid)
             except Exception as e:  # noqa: BLE001
-                gw().last_error = str(e)[:500]
-                yield ev(type="RUN_ERROR", message=str(e))
+                _status, message = public_error(e)
+                gw().last_error = message
+                yield ev(type="RUN_ERROR", message=message)
 
         return StreamingResponse(gen(), media_type="text/event-stream")
 

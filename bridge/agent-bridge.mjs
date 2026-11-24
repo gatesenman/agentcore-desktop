@@ -11,6 +11,8 @@ import { mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
+import { checkGatewayHealth, createGatewaySupervisor } from "./gateway-supervisor.mjs";
+import { resolveProductHomeDataDirName } from "../ZCode/packages/desktop/scripts/desktop-product-identity.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
@@ -24,28 +26,73 @@ const configOnly = process.argv.includes("--write-config-only");
 const prestart = process.argv.includes("--prestart");
 // 1) gateway (skip if already up)
 let gw = null;
-const up = async () => { try { return (await fetch(`http://127.0.0.1:${port}/healthz`)).ok; } catch { return false; } };
-if (!configOnly && !(await up())) {
+const healthUrl = `http://127.0.0.1:${port}/healthz`;
+const up = async () => (await checkGatewayHealth(healthUrl)).ok;
+
+function resolveGatewayCommand() {
   // 打包态：resources/agent-gateway/agent-gateway（PyInstaller）；开发态：agent-service/.venv
   const res = process.env.AGENTCORE_RESOURCES;
   const frozen = process.env.AGENT_GATEWAY_BIN ||
     (res && [join(res, "agent-gateway", "agent-gateway"), join(res, "agent-gateway", "agent-gateway.exe")].find(existsSync));
-  const [gcmd, gargs, gcwd] = frozen
-    ? [frozen, ["--port", String(port)], dirname(frozen)]
-    : [process.platform === "win32" ? join(svc, ".venv", "Scripts", "python.exe") : join(svc, ".venv", "bin", "python"), ["-m", "uvicorn", "agent_gateway.server:app", "--host", "127.0.0.1", "--port", String(port)], svc];
-  // detached：Agent 子进程退出后网关保留，供后续会话复用
-  gw = spawn(gcmd, gargs, { cwd: gcwd, stdio: ["ignore", "ignore", "inherit"], env: process.env, detached: Boolean(frozen), windowsHide: true });
-  if (frozen) { gw.unref(); gw = null; }
-  for (let i = 0; i < 100 && !(await up()); i++) await new Promise((r) => setTimeout(r, 200));
+  if (frozen) {
+    return { cmd: frozen, args: ["--port", String(port)], cwd: dirname(frozen), detached: true };
+  }
+  const python = process.platform === "win32"
+    ? join(svc, ".venv", "Scripts", "python.exe")
+    : join(svc, ".venv", "bin", "python");
+  return {
+    cmd: python,
+    args: ["-m", "uvicorn", "agent_gateway.server:app", "--host", "127.0.0.1", "--port", String(port)],
+    cwd: svc,
+    detached: false,
+  };
 }
-if (!configOnly) log("gateway", JSON.stringify(await (await fetch(`http://127.0.0.1:${port}/healthz`)).json()));
+
+async function startGateway() {
+  const resolved = resolveGatewayCommand();
+  if (gw && !gw.killed) {
+    try { gw.kill(); } catch { /* already gone */ }
+  }
+  gw = spawn(resolved.cmd, resolved.args, {
+    cwd: resolved.cwd,
+    stdio: ["ignore", "ignore", "inherit"],
+    env: process.env,
+    detached: resolved.detached,
+    windowsHide: true,
+  });
+  if (resolved.detached) {
+    gw.unref();
+    gw = null;
+  }
+  for (let i = 0; i < 100 && !(await up()); i++) await new Promise((r) => setTimeout(r, 200));
+  return up();
+}
+
+if (!configOnly && !(await up())) {
+  await startGateway();
+}
+if (!configOnly) {
+  try {
+    log("gateway", JSON.stringify((await checkGatewayHealth(healthUrl)).body ?? { ok: await up() }));
+  } catch {
+    log("gateway", "healthz-unreadable");
+  }
+  const supervisor = createGatewaySupervisor({
+    intervalMs: Number(process.env.AGENT_GATEWAY_HEALTH_INTERVAL_MS ?? 10_000),
+    failThreshold: Number(process.env.AGENT_GATEWAY_HEALTH_FAILS ?? 2),
+    check: () => checkGatewayHealth(healthUrl),
+    start: startGateway,
+    log,
+  });
+  supervisor.startWatching();
+}
 
 // 2) provider config
 const providerId = "agent-gateway";
 const modelId = "agent-gateway";
 // 写到 ZCode 默认 Personal Provider 路径，Host(UI 模型列表) 与 Agent 读到同一份配置。
-// 建议配合独立 ZCODE_DATA_BASE_DIR 使用，避免覆盖个人配置。
-const dir = process.env.AGENT_BRIDGE_PROVIDER_DIR ?? join(process.env.ZCODE_DATA_BASE_DIR ?? homedir(), ".zcode", "v2");
+// 默认写入 ~/.agentcore-desktop/v2，避免覆盖 ~/.zcode 下的个人配置。
+const dir = process.env.AGENT_BRIDGE_PROVIDER_DIR ?? join(process.env.ZCODE_DATA_BASE_DIR ?? homedir(), resolveProductHomeDataDirName(), "v2");
 mkdirSync(dir, { recursive: true });
 const providerFile = join(dir, "provider_config.json");
 writeFileSync(providerFile, JSON.stringify({
