@@ -5,23 +5,27 @@
 import { join, resolve } from "node:path";
 import type { RootsResolverPort } from "../app/ports.js";
 import type { StorageRootSpec } from "@zcode/shared";
+import { getProductHomeDataDirName } from "../../paths.js";
 
+/** @deprecated 使用 getProductHomeDataDirName()；保留该常量仅为旧测试/调用方兼容。 */
 export const ZCODE_DATA_DIR_NAME = ".zcode";
 
 export function resolveStorageRoots(params: {
   homeDir: string;
   dataBaseDir: string;
+  dataDirName?: string;
 }): StorageRootSpec[] {
+  const dirName = params.dataDirName ?? getProductHomeDataDirName();
   const home = resolve(params.homeDir);
   const dataBase = resolve(params.dataBaseDir);
   const hasCustomDataBaseDir = dataBase !== home;
   const roots: StorageRootSpec[] = [
-    { id: "home", path: join(home, ZCODE_DATA_DIR_NAME), hasCustomDataBaseDir },
+    { id: "home", path: join(home, dirName), hasCustomDataBaseDir },
   ];
   if (hasCustomDataBaseDir) {
     roots.push({
       id: "dataBaseDir",
-      path: join(dataBase, ZCODE_DATA_DIR_NAME),
+      path: join(dataBase, dirName),
       hasCustomDataBaseDir,
     });
   }

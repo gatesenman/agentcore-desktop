@@ -35,7 +35,7 @@ describe("desktop Linux deep link registration helpers", () => {
 
     expect(command.executablePath).toBe("/home/alice/Downloads/ZCode-2.8.0-linux-x64.AppImage");
     expect(entry).toContain('Exec="/home/alice/Downloads/ZCode-2.8.0-linux-x64.AppImage" %U');
-    expect(entry).toContain("MimeType=x-scheme-handler/zcode;");
+    expect(entry).toContain("MimeType=x-scheme-handler/agentcore;");
   });
 
   it("keeps AppImage sandbox and GPU launch switches for protocol callbacks", async () => {
@@ -52,7 +52,7 @@ describe("desktop Linux deep link registration helpers", () => {
         "--disable-software-rasterizer",
         "--use-gl=swiftshader",
         "--remote-debugging-port=9229",
-        "zcode://oauth/callback?code=1&state=s",
+        "agentcore://oauth/callback?code=1&state=s",
         "/home/alice/project",
       ],
     });
@@ -110,7 +110,7 @@ describe("desktop Linux deep link registration helpers", () => {
     expect(entry).toContain("Name=ZCode Preview");
     expect(entry).toContain("StartupWMClass=ZCode Preview");
     expect(entry).toContain('Exec="/opt/ZCode Preview/zcode-preview" %U');
-    expect(entry).toContain("MimeType=x-scheme-handler/zcode;");
+    expect(entry).toContain("MimeType=x-scheme-handler/agentcore;");
   });
 
   it("escapes AppImage callback switches before writing desktop Exec", async () => {
@@ -220,7 +220,7 @@ describe("desktop Linux deep link registration helpers", () => {
         },
       });
 
-      const desktopFilePath = join(homeDir, ".local", "share", "applications", "zcode.desktop");
+      const desktopFilePath = join(homeDir, ".local", "share", "applications", "agentcore-desktop.desktop");
       expect(existsSync(desktopFilePath)).toBe(true);
       expect(readFileSync(desktopFilePath, "utf8")).toContain(
         'Exec="/home/alice/Applications/ZCode.AppImage" %U',
@@ -235,7 +235,7 @@ describe("desktop Linux deep link registration helpers", () => {
         },
         {
           command: "xdg-mime",
-          args: ["default", "zcode.desktop", "x-scheme-handler/zcode"],
+          args: ["default", "agentcore-desktop.desktop", "x-scheme-handler/agentcore"],
         },
       ]);
     } finally {
@@ -268,15 +268,15 @@ describe("desktop Linux deep link registration helpers", () => {
     const tempRoot = mkdtempSync(join(tmpdir(), "zcode-linux-system-entry-"));
     const homeDir = join(tempRoot, "home");
     const systemApplicationsDir = join(tempRoot, "system", "applications");
-    const desktopFilePath = join(homeDir, ".local", "share", "applications", "zcode.desktop");
+    const desktopFilePath = join(homeDir, ".local", "share", "applications", "agentcore-desktop.desktop");
     const infos: unknown[][] = [];
     const commandCalls: CommandCall[] = [];
 
     try {
-      // 模拟 rpm/deb 安装产物：/usr/share/applications/zcode.desktop。
+      // 模拟 rpm/deb 安装产物：/usr/share/applications/agentcore-desktop.desktop。
       mkdirSync(systemApplicationsDir, { recursive: true });
       writeFileSync(
-        join(systemApplicationsDir, "zcode.desktop"),
+        join(systemApplicationsDir, "agentcore-desktop.desktop"),
         "[Desktop Entry]\nName=ZCode\nExec=/opt/ZCode/zcode %U\n",
         "utf8",
       );
@@ -289,7 +289,7 @@ describe("desktop Linux deep link registration helpers", () => {
           "Name=ZCode",
           "Comment=ZCode Desktop App",
           'Exec="/home/alice/Downloads/ZCode-2.8.0-linux-x64.AppImage" %U',
-          "MimeType=x-scheme-handler/zcode;",
+          "MimeType=x-scheme-handler/agentcore;",
           "",
         ].join("\n"),
         "utf8",
@@ -319,7 +319,7 @@ describe("desktop Linux deep link registration helpers", () => {
         },
         {
           command: "xdg-mime",
-          args: ["default", "zcode.desktop", "x-scheme-handler/zcode"],
+          args: ["default", "agentcore-desktop.desktop", "x-scheme-handler/agentcore"],
         },
       ]);
       expect(
@@ -336,13 +336,13 @@ describe("desktop Linux deep link registration helpers", () => {
     const tempRoot = mkdtempSync(join(tmpdir(), "zcode-linux-custom-entry-"));
     const homeDir = join(tempRoot, "home");
     const systemApplicationsDir = join(tempRoot, "system", "applications");
-    const desktopFilePath = join(homeDir, ".local", "share", "applications", "zcode.desktop");
+    const desktopFilePath = join(homeDir, ".local", "share", "applications", "agentcore-desktop.desktop");
     const warnings: unknown[][] = [];
 
     try {
       mkdirSync(systemApplicationsDir, { recursive: true });
       writeFileSync(
-        join(systemApplicationsDir, "zcode.desktop"),
+        join(systemApplicationsDir, "agentcore-desktop.desktop"),
         "[Desktop Entry]\nName=ZCode\nExec=/opt/ZCode/zcode %U\n",
         "utf8",
       );
@@ -369,7 +369,7 @@ describe("desktop Linux deep link registration helpers", () => {
       expect(
         warnings.some(
           ([message]) =>
-            message === "[deep-link] Linux 用户级 zcode.desktop 非本应用写入，保留不清理",
+            message === "[deep-link] Linux 用户级 agentcore-desktop.desktop 非本应用写入，保留不清理",
         ),
       ).toBe(true);
     } finally {
@@ -383,14 +383,14 @@ describe("desktop Linux deep link registration helpers", () => {
     const tempRoot = mkdtempSync(join(tmpdir(), "zcode-linux-appimage-system-"));
     const homeDir = join(tempRoot, "home");
     const systemApplicationsDir = join(tempRoot, "system", "applications");
-    const desktopFilePath = join(homeDir, ".local", "share", "applications", "zcode.desktop");
+    const desktopFilePath = join(homeDir, ".local", "share", "applications", "agentcore-desktop.desktop");
     const iconSourcePath = join(import.meta.dirname, "..", "build", "icons", "512x512.png");
     const commandCalls: CommandCall[] = [];
 
     try {
       mkdirSync(systemApplicationsDir, { recursive: true });
       writeFileSync(
-        join(systemApplicationsDir, "zcode.desktop"),
+        join(systemApplicationsDir, "agentcore-desktop.desktop"),
         "[Desktop Entry]\nName=ZCode\nExec=/opt/ZCode/zcode %U\n",
         "utf8",
       );
@@ -422,7 +422,7 @@ describe("desktop Linux deep link registration helpers", () => {
         },
         {
           command: "xdg-mime",
-          args: ["default", "zcode.desktop", "x-scheme-handler/zcode"],
+          args: ["default", "agentcore-desktop.desktop", "x-scheme-handler/agentcore"],
         },
       ]);
     } finally {
@@ -435,7 +435,7 @@ describe("desktop Linux deep link registration helpers", () => {
       await import("../src/main/desktopLinuxDeepLinkRegistration.js");
     const tempRoot = mkdtempSync(join(tmpdir(), "zcode-linux-no-system-"));
     const homeDir = join(tempRoot, "home");
-    const desktopFilePath = join(homeDir, ".local", "share", "applications", "zcode.desktop");
+    const desktopFilePath = join(homeDir, ".local", "share", "applications", "agentcore-desktop.desktop");
 
     try {
       registerLinuxDeepLinkProtocol({
@@ -459,12 +459,12 @@ describe("desktop Linux deep link registration helpers", () => {
       await import("../src/main/desktopLinuxDeepLinkRegistration.js");
     const tempRoot = mkdtempSync(join(tmpdir(), "zcode-linux-dir-system-"));
     const homeDir = join(tempRoot, "home");
-    // 系统目录下的 zcode.desktop 是一个目录而非普通文件，不得视为有效系统条目。
+    // 系统目录下的 agentcore-desktop.desktop 是一个目录而非普通文件，不得视为有效系统条目。
     const systemApplicationsDir = join(tempRoot, "system", "applications");
-    const desktopFilePath = join(homeDir, ".local", "share", "applications", "zcode.desktop");
+    const desktopFilePath = join(homeDir, ".local", "share", "applications", "agentcore-desktop.desktop");
 
     try {
-      mkdirSync(join(systemApplicationsDir, "zcode.desktop"), { recursive: true });
+      mkdirSync(join(systemApplicationsDir, "agentcore-desktop.desktop"), { recursive: true });
       registerLinuxDeepLinkProtocol({
         executablePath: "/opt/ZCode/zcode",
         homeDir,
@@ -487,14 +487,14 @@ describe("desktop Linux deep link registration helpers", () => {
     const tempRoot = mkdtempSync(join(tmpdir(), "zcode-linux-unreadable-"));
     const homeDir = join(tempRoot, "home");
     const systemApplicationsDir = join(tempRoot, "system", "applications");
-    const desktopFilePath = join(homeDir, ".local", "share", "applications", "zcode.desktop");
+    const desktopFilePath = join(homeDir, ".local", "share", "applications", "agentcore-desktop.desktop");
     const warnings: unknown[][] = [];
     const commandCalls: CommandCall[] = [];
 
     try {
       mkdirSync(systemApplicationsDir, { recursive: true });
       writeFileSync(
-        join(systemApplicationsDir, "zcode.desktop"),
+        join(systemApplicationsDir, "agentcore-desktop.desktop"),
         "[Desktop Entry]\nName=ZCode\nExec=/opt/ZCode/zcode %U\n",
         "utf8",
       );
@@ -522,7 +522,7 @@ describe("desktop Linux deep link registration helpers", () => {
       expect(
         warnings.some(
           ([message]) =>
-            message === "[deep-link] Linux 用户级 zcode.desktop 非本应用写入，保留不清理",
+            message === "[deep-link] Linux 用户级 agentcore-desktop.desktop 非本应用写入，保留不清理",
         ),
       ).toBe(true);
       // 归属识别失败只降级，协议注册命令仍完整执行。
@@ -533,7 +533,7 @@ describe("desktop Linux deep link registration helpers", () => {
         },
         {
           command: "xdg-mime",
-          args: ["default", "zcode.desktop", "x-scheme-handler/zcode"],
+          args: ["default", "agentcore-desktop.desktop", "x-scheme-handler/agentcore"],
         },
       ]);
     } finally {
@@ -548,13 +548,13 @@ describe("desktop Linux deep link registration helpers", () => {
     const tempRoot = mkdtempSync(join(tmpdir(), "zcode-linux-crlf-"));
     const homeDir = join(tempRoot, "home");
     const systemApplicationsDir = join(tempRoot, "system", "applications");
-    const desktopFilePath = join(homeDir, ".local", "share", "applications", "zcode.desktop");
+    const desktopFilePath = join(homeDir, ".local", "share", "applications", "agentcore-desktop.desktop");
     const infos: unknown[][] = [];
 
     try {
       mkdirSync(systemApplicationsDir, { recursive: true });
       writeFileSync(
-        join(systemApplicationsDir, "zcode.desktop"),
+        join(systemApplicationsDir, "agentcore-desktop.desktop"),
         "[Desktop Entry]\nName=ZCode\nExec=/opt/ZCode/zcode %U\n",
         "utf8",
       );
@@ -567,7 +567,7 @@ describe("desktop Linux deep link registration helpers", () => {
           "Name=ZCode",
           "Comment=ZCode Desktop App",
           'Exec="/home/alice/Downloads/ZCode.AppImage" %U',
-          "MimeType=x-scheme-handler/zcode;",
+          "MimeType=x-scheme-handler/agentcore;",
           "",
         ].join("\r\n"),
         "utf8",
@@ -588,7 +588,7 @@ describe("desktop Linux deep link registration helpers", () => {
       expect(existsSync(desktopFilePath)).toBe(false);
       expect(
         infos.some(
-          ([message]) => message === "[deep-link] 已清理遗留的用户级 zcode.desktop，恢复系统级条目",
+          ([message]) => message === "[deep-link] 已清理遗留的用户级 agentcore-desktop.desktop，恢复系统级条目",
         ),
       ).toBe(true);
     } finally {
@@ -608,14 +608,14 @@ describe("desktop Linux deep link registration helpers", () => {
       const homeDir = join(tempRoot, "home");
       const systemApplicationsDir = join(tempRoot, "system", "applications");
       const applicationsDir = join(homeDir, ".local", "share", "applications");
-      const desktopFilePath = join(applicationsDir, "zcode.desktop");
+      const desktopFilePath = join(applicationsDir, "agentcore-desktop.desktop");
       const warnings: unknown[][] = [];
       const commandCalls: CommandCall[] = [];
 
       try {
         mkdirSync(systemApplicationsDir, { recursive: true });
         writeFileSync(
-          join(systemApplicationsDir, "zcode.desktop"),
+          join(systemApplicationsDir, "agentcore-desktop.desktop"),
           "[Desktop Entry]\nName=ZCode\nExec=/opt/ZCode/zcode %U\n",
           "utf8",
         );
@@ -645,7 +645,7 @@ describe("desktop Linux deep link registration helpers", () => {
 
         expect(existsSync(desktopFilePath)).toBe(true);
         expect(
-          warnings.some(([message]) => message === "[deep-link] 清理遗留用户级 zcode.desktop 失败"),
+          warnings.some(([message]) => message === "[deep-link] 清理遗留用户级 agentcore-desktop.desktop 失败"),
         ).toBe(true);
         expect(commandCalls).toEqual([
           {
@@ -654,7 +654,7 @@ describe("desktop Linux deep link registration helpers", () => {
           },
           {
             command: "xdg-mime",
-            args: ["default", "zcode.desktop", "x-scheme-handler/zcode"],
+            args: ["default", "agentcore-desktop.desktop", "x-scheme-handler/agentcore"],
           },
         ]);
       } finally {

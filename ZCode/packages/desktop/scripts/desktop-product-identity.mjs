@@ -73,8 +73,20 @@ export function resolveDesktopProductFlavor(env = process.env) {
   return normalizeDesktopZCodeEnv(env) === "production" ? "production" : "preview";
 }
 
+export function isAgentCoreDesktopIdentityEnabled(env = process.env) {
+  return (env.AGENTCORE_DESKTOP_IDENTITY ?? "1") !== "0";
+}
+
+export function resolveDesktopProtocolScheme(env = process.env) {
+  return isAgentCoreDesktopIdentityEnabled(env) ? "agentcore" : "zcode";
+}
+
+export function resolveProductHomeDataDirName(env = process.env) {
+  return isAgentCoreDesktopIdentityEnabled(env) ? ".agentcore-desktop" : ".zcode";
+}
+
 export function resolveDesktopProductIdentity(env = process.env) {
-  if ((env.AGENTCORE_DESKTOP_IDENTITY ?? "1") !== "0") return AGENTCORE_IDENTITY;
+  if (isAgentCoreDesktopIdentityEnabled(env)) return AGENTCORE_IDENTITY;
   return desktopProductIdentities[resolveDesktopProductFlavor(env)];
 }
 
@@ -93,13 +105,16 @@ export function resolveDesktopArtifactSuffix(env = process.env) {
  * 和运行中的 Electron 进程会被 Windows 视为三个不同的应用。开发态继续保留旧身份，
  * 避免本地调试快捷方式和正式/Preview 安装包互相污染。
  */
-export function resolveWindowsAppUserModelIdForFlavor(flavor, runtime = { isPackaged: true }) {
+export function resolveWindowsAppUserModelIdForFlavor(flavor, runtime = { isPackaged: true }, env = process.env) {
   if (runtime.isPackaged === false) {
-    return "cn.aminer.zcode";
+    return isAgentCoreDesktopIdentityEnabled(env) ? "com.agentcore.desktop.dev" : "cn.aminer.zcode";
+  }
+  if (isAgentCoreDesktopIdentityEnabled(env)) {
+    return AGENTCORE_IDENTITY.appId;
   }
   return desktopProductIdentities[flavor === "preview" ? "preview" : "production"].appId;
 }
 
 export function resolveWindowsAppUserModelId(env = process.env, runtime = { isPackaged: true }) {
-  return resolveWindowsAppUserModelIdForFlavor(resolveDesktopProductFlavor(env), runtime);
+  return resolveWindowsAppUserModelIdForFlavor(resolveDesktopProductFlavor(env), runtime, env);
 }

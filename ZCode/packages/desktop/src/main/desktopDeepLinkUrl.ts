@@ -1,5 +1,15 @@
-const DEEP_LINK_SCHEME = "zcode";
-const DEEP_LINK_RE = /\bzcode:(?:\/\/|\/)?[^\s"'<>]+/i;
+import { resolveDesktopProtocolScheme } from "../../scripts/desktop-product-identity.mjs";
+
+export function getDeepLinkScheme(env: NodeJS.ProcessEnv = process.env): string {
+  return resolveDesktopProtocolScheme(env);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const DEEP_LINK_SCHEME = getDeepLinkScheme();
+const DEEP_LINK_RE = new RegExp(`\\b${escapeRegExp(DEEP_LINK_SCHEME)}:(?://|/)?[^\\s"'<>]+`, "i");
 const OAUTH_CALLBACK_HOSTS = new Set(["oauth"]);
 const PAYMENT_CALLBACK_HOST = "payment";
 const WORKSPACE_OPEN_HOST = "workspace";

@@ -2,9 +2,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { setDataBaseDir } from "@zcode/services/node";
+import { resolveProductHomeDataDirName } from "../../scripts/desktop-product-identity.mjs";
 
-export function resolveBootstrapSettingsFile(homePath: string = homedir()): string {
-  return join(homePath, ".zcode", "v2", "setting.json");
+export function resolveBootstrapSettingsFile(homePath: string = homedir(), env: NodeJS.ProcessEnv = process.env): string {
+  return join(homePath, resolveProductHomeDataDirName(env), "v2", "setting.json");
 }
 
 export function extractBootstrapDataBaseDir(rawValue: unknown): string | null {

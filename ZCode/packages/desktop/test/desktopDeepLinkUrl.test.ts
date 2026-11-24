@@ -4,12 +4,12 @@ describe("desktop deep link url helpers", () => {
   it("recognizes only the unified OAuth callback url", async () => {
     const { isOAuthCallbackUrl } = await import("../src/main/desktopDeepLinkUrl.js");
 
-    expect(isOAuthCallbackUrl(new URL("zcode://oauth/callback?code=1&state=s"))).toBe(true);
-    expect(isOAuthCallbackUrl(new URL("zcode://bigmodel-auth/callback?authCode=1&state=s"))).toBe(
+    expect(isOAuthCallbackUrl(new URL("agentcore://oauth/callback?code=1&state=s"))).toBe(true);
+    expect(isOAuthCallbackUrl(new URL("agentcore://bigmodel-auth/callback?authCode=1&state=s"))).toBe(
       false,
     );
-    expect(isOAuthCallbackUrl(new URL("zcode://zai-auth/callback?code=1&state=s"))).toBe(false);
-    expect(isOAuthCallbackUrl(new URL("zcode://oauth/other?code=1&state=s"))).toBe(false);
+    expect(isOAuthCallbackUrl(new URL("agentcore://zai-auth/callback?code=1&state=s"))).toBe(false);
+    expect(isOAuthCallbackUrl(new URL("agentcore://oauth/other?code=1&state=s"))).toBe(false);
     expect(isOAuthCallbackUrl(new URL("https://oauth/callback?code=1&state=s"))).toBe(false);
   });
 
@@ -27,31 +27,31 @@ describe("desktop deep link url helpers", () => {
     const { isOAuthCallbackUrl, isPaymentCallbackUrl } =
       await import("../src/main/desktopDeepLinkUrl.js");
 
-    const paymentUrl = new URL("zcode://payment/callback?provider=zai&channel=paypal");
+    const paymentUrl = new URL("agentcore://payment/callback?provider=zai&channel=paypal");
     expect(isPaymentCallbackUrl(paymentUrl)).toBe(true);
     expect(isOAuthCallbackUrl(paymentUrl)).toBe(false);
-    expect(isPaymentCallbackUrl(new URL("zcode://payment/other"))).toBe(false);
+    expect(isPaymentCallbackUrl(new URL("agentcore://payment/other"))).toBe(false);
   });
 
   it("recognizes workspace open urls and extracts the encoded folder path", async () => {
     const { extractWorkspaceOpenPath, isWorkspaceOpenUrl } =
       await import("../src/main/desktopDeepLinkUrl.js");
 
-    const workspaceUrl = new URL("zcode://workspace/open?path=%2FUsers%2Fdemo%2FProject%20A%26B");
+    const workspaceUrl = new URL("agentcore://workspace/open?path=%2FUsers%2Fdemo%2FProject%20A%26B");
     expect(isWorkspaceOpenUrl(workspaceUrl)).toBe(true);
     expect(extractWorkspaceOpenPath(workspaceUrl)).toBe("/Users/demo/Project A&B");
-    expect(isWorkspaceOpenUrl(new URL("zcode://workspace/other?path=%2Ftmp"))).toBe(false);
-    expect(extractWorkspaceOpenPath(new URL("zcode://workspace/open"))).toBeNull();
+    expect(isWorkspaceOpenUrl(new URL("agentcore://workspace/other?path=%2Ftmp"))).toBe(false);
+    expect(extractWorkspaceOpenPath(new URL("agentcore://workspace/open"))).toBeNull();
   });
 
   it("只接受不含额外敏感参数的 share import code", async () => {
     const { extractShareImportCode, isShareImportUrl } =
       await import("../src/main/desktopDeepLinkUrl.js");
-    const valid = new URL("zcode://share/import?code=abc_DEF-123");
+    const valid = new URL("agentcore://share/import?code=abc_DEF-123");
     expect(isShareImportUrl(valid)).toBe(true);
     expect(extractShareImportCode(valid)).toBe("abc_DEF-123");
-    expect(extractShareImportCode(new URL("zcode://share/import"))).toBeNull();
-    expect(extractShareImportCode(new URL("zcode://share/import?code=bad%2Fcode"))).toBeNull();
+    expect(extractShareImportCode(new URL("agentcore://share/import"))).toBeNull();
+    expect(extractShareImportCode(new URL("agentcore://share/import?code=bad%2Fcode"))).toBeNull();
     expect(isShareImportUrl(new URL("https://share/import?code=abc"))).toBe(false);
   });
 
@@ -59,46 +59,46 @@ describe("desktop deep link url helpers", () => {
     const { extractDeepLinkUrlFromArgs } = await import("../src/main/desktopDeepLinkUrl.js");
 
     expect(
-      extractDeepLinkUrlFromArgs(["/opt/ZCode/zcode", "zcode://oauth/callback?code=1&state=s"]),
-    ).toBe("zcode://oauth/callback?code=1&state=s");
+      extractDeepLinkUrlFromArgs(["/opt/ZCode/zcode", "agentcore://oauth/callback?code=1&state=s"]),
+    ).toBe("agentcore://oauth/callback?code=1&state=s");
     expect(
       extractDeepLinkUrlFromArgs([
         "/opt/ZCode/zcode",
-        "--open-url=zcode://oauth/callback?code=1&state=s",
+        "--open-url=agentcore://oauth/callback?code=1&state=s",
       ]),
-    ).toBe("zcode://oauth/callback?code=1&state=s");
+    ).toBe("agentcore://oauth/callback?code=1&state=s");
     expect(
       extractDeepLinkUrlFromArgs([
         "/opt/ZCode/zcode",
-        "zcode%3A%2F%2Foauth%2Fcallback%3Fcode%3D1%26state%3Ds",
+        "agentcore%3A%2F%2Foauth%2Fcallback%3Fcode%3D1%26state%3Ds",
       ]),
-    ).toBe("zcode://oauth/callback?code=1&state=s");
+    ).toBe("agentcore://oauth/callback?code=1&state=s");
     expect(
       extractDeepLinkUrlFromArgs([
         "/opt/ZCode/zcode",
-        "zcode%253A%252F%252Foauth%252Fcallback%253Fcode%253D1%2526state%253Ds",
+        "agentcore%253A%252F%252Foauth%252Fcallback%253Fcode%253D1%2526state%253Ds",
       ]),
-    ).toBe("zcode://oauth/callback?code=1&state=s");
+    ).toBe("agentcore://oauth/callback?code=1&state=s");
     expect(
-      extractDeepLinkUrlFromArgs(["/opt/ZCode/zcode", "zcode://oauth/callback?code=1", "&state=s"]),
-    ).toBe("zcode://oauth/callback?code=1&state=s");
+      extractDeepLinkUrlFromArgs(["/opt/ZCode/zcode", "agentcore://oauth/callback?code=1", "&state=s"]),
+    ).toBe("agentcore://oauth/callback?code=1&state=s");
     expect(
-      extractDeepLinkUrlFromArgs(["/opt/ZCode/zcode", "zcode://oauth/callback?code=1&amp;state=s"]),
-    ).toBe("zcode://oauth/callback?code=1&state=s");
+      extractDeepLinkUrlFromArgs(["/opt/ZCode/zcode", "agentcore://oauth/callback?code=1&amp;state=s"]),
+    ).toBe("agentcore://oauth/callback?code=1&state=s");
     expect(
       extractDeepLinkUrlFromArgs([
         "/opt/ZCode/zcode",
-        "zcode://payment/callback?provider=zai",
+        "agentcore://payment/callback?provider=zai",
         "&channel=paypal",
         "&status=return",
       ]),
-    ).toBe("zcode://payment/callback?provider=zai&channel=paypal&status=return");
+    ).toBe("agentcore://payment/callback?provider=zai&channel=paypal&status=return");
     expect(
       extractDeepLinkUrlFromArgs([
         "/Applications/ZCode.app/Contents/MacOS/ZCode",
-        "zcode://workspace/open?path=%2FUsers%2Fdemo%2FProject%2520A",
+        "agentcore://workspace/open?path=%2FUsers%2Fdemo%2FProject%2520A",
       ]),
-    ).toBe("zcode://workspace/open?path=%2FUsers%2Fdemo%2FProject%2520A");
+    ).toBe("agentcore://workspace/open?path=%2FUsers%2Fdemo%2FProject%2520A");
   });
 
   it("returns null when argv does not contain a deep link", async () => {
@@ -139,12 +139,12 @@ describe("desktop deep link url helpers", () => {
 
     const additionalData = createDeepLinkSingleInstanceData([
       "/opt/ZCode/zcode",
-      "zcode%253A%252F%252Foauth%252Fcallback%253Fcode%253D1%2526state%253Ds",
+      "agentcore%253A%252F%252Foauth%252Fcallback%253Fcode%253D1%2526state%253Ds",
       "--open-workspace=C:\\Users\\demo\\Project A",
     ]);
 
     expect(extractDeepLinkUrlFromSingleInstanceData(additionalData)).toBe(
-      "zcode://oauth/callback?code=1&state=s",
+      "agentcore://oauth/callback?code=1&state=s",
     );
     expect(extractOpenWorkspacePathFromSingleInstanceData(additionalData)).toBe(
       "C:\\Users\\demo\\Project A",
