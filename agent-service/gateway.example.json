@@ -1,7 +1,17 @@
 {
   "backend": "mock",
   "backends": {
-    "agentscope": { "dashscope_model": "qwen-plus", "sys_prompt": "You are a helpful assistant." },
-    "openai": { "base_url": "http://127.0.0.1:8000/v1", "api_key": "", "upstream_model": "" }
+    "mock": {},
+    "agentscope": {
+      "model_provider": "dashscope",
+      "model": "qwen-plus",
+      "sys_prompt": "You are a helpful assistant."
+    },
+    "openai": {
+      "base_url": "https://api.siliconflow.cn/v1",
+      "upstream_model": "Qwen/Qwen2.5-7B-Instruct"
+    },
+    "agentcore": {},
+    "agui": {}
   }
 }

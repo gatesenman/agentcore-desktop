@@ -16,6 +16,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from .backends import REGISTRY
 from .backends.base import AgentBackend
 from .errors import public_error
+from .presets import BACKEND_LABELS, list_presets
 
 
 def _load_dotenv() -> None:
@@ -280,20 +281,48 @@ def create_app(runtime: GatewayRuntime | None = None, **runtime_kwargs) -> FastA
         return StreamingResponse(gen(), media_type="text/event-stream")
 
     settings_html = """<!doctype html><meta charset=utf-8><title>AgentCore Desktop · Agent 后端设置</title>
-<style>body{font:14px system-ui;background:#1b1b1b;color:#ddd;max-width:640px;margin:40px auto}select,input,button,textarea{font:inherit;padding:6px;margin:4px 0;width:100%;box-sizing:border-box}label{display:block;margin-top:12px;color:#aaa}button{background:#3b82f6;color:#fff;border:0;border-radius:6px;cursor:pointer}</style>
-<h2>Agent 后端设置</h2><p>当前：<b id=cur></b></p>
+<style>body{font:14px system-ui;background:#1b1b1b;color:#ddd;max-width:720px;margin:40px auto;line-height:1.5}select,input,button,textarea{font:inherit;padding:6px;margin:4px 0;width:100%;box-sizing:border-box}label{display:block;margin-top:12px;color:#aaa}button{background:#3b82f6;color:#fff;border:0;border-radius:6px;cursor:pointer}button.secondary{background:#334155;margin-right:8px;width:auto}#presets{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.hint{color:#9ca3af;font-size:12px}</style>
+<h2>Agent 后端设置</h2>
+<p>当前：<b id=cur></b></p>
+<p class="hint">密钥请写在 <code>.env</code> 或 <code>~/.agentcore-desktop/.env</code>，不要粘贴到下面的 JSON 里，也不要提交到 Git。</p>
+<label>快捷预设</label>
+<div id=presets></div>
 <label>后端<select id=backend></select></label>
-<label>backend 配置（JSON，可留空；密钥建议放 .env）<textarea id=cfg rows=8 style="width:100%"></textarea></label>
+<label>backend 配置（JSON，可留空；不要填写 api_key）<textarea id=cfg rows=8 style="width:100%"></textarea></label>
 <button onclick=save()>保存并切换</button><p id=msg></p>
 <script>
-async function load(){const r=await (await fetch('/admin/backend')).json();cur.textContent=r.backend;
-backend.innerHTML=r.available.map(b=>`<option ${b==r.backend?'selected':''}>${b}</option>`).join('');cfg.value=JSON.stringify(r.config||{},null,2)}
-async function save(){const r=await fetch('/admin/backend',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({backend:backend.value,config:JSON.parse(cfg.value||'{}')})});msg.textContent=r.ok?'已切换（新会话/下一条消息生效）':'失败：'+await r.text();load()}
-load()</script>"""
+async function load(){
+  const r=await (await fetch('/admin/backend')).json();
+  const p=await (await fetch('/admin/presets')).json();
+  cur.textContent=(r.backend_label||r.backend)+' ('+r.backend+')';
+  backend.innerHTML=r.available.map(b=>`<option value="${b}" ${b==r.backend?'selected':''}>${(r.labels&&r.labels[b])||b}</option>`).join('');
+  cfg.value=JSON.stringify(r.config||{},null,2);
+  presets.innerHTML=p.presets.map(x=>`<button class=secondary type=button onclick='applyPreset(${JSON.stringify(x.id)})'>${x.label}</button>`).join('');
+  window.__presets=p.presets;
+}
+async function applyPreset(id){
+  const spec=(window.__presets||[]).find(x=>x.id===id);
+  if(!spec)return;
+  backend.value=spec.backend;
+  cfg.value=JSON.stringify(spec.config||{},null,2);
+  msg.textContent='已套用预设「'+spec.label+'」。请确认后点击保存。密钥仍应放在 .env。';
+}
+async function save(){
+  const r=await fetch('/admin/backend',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({backend:backend.value,config:JSON.parse(cfg.value||'{}')})});
+  msg.textContent=r.ok?'已切换（新会话/下一条消息生效）':'失败：'+await r.text();
+  load();
+}
+load()
+</script>"""
+
 
     @app.get("/settings")
     async def settings_page():
         return HTMLResponse(settings_html)
+
+    @app.get("/admin/presets")
+    async def get_presets():
+        return list_presets()
 
     @app.get("/admin/backend")
     async def get_backend(name: str | None = None):
@@ -309,8 +338,10 @@ load()</script>"""
         )
         return {
             "backend": gw().backend.name,
+            "backend_label": BACKEND_LABELS.get(gw().backend.name, gw().backend.name),
             "selected": sel,
             "available": sorted(REGISTRY),
+            "labels": {name: BACKEND_LABELS.get(name, name) for name in REGISTRY},
             "config": {k: v for k, v in raw.items() if k not in SECRET_KEYS and not k.startswith("_")},
             "secrets_set": [k for k in SECRET_KEYS if raw.get(k)],
         }
